@@ -1,0 +1,137 @@
+<script setup lang="ts">
+import { onBeforeUnmount, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useTrainingSession } from '../features/training/composables/useTrainingSession';
+import { useSettingsStore } from '../features/settings/settingsStore';
+import { statsService } from '../features/stats/statsService';
+import StereoCanvas from '../features/stereo/StereoCanvas.vue';
+import { Icon } from '@iconify/vue';
+
+const router = useRouter();
+const settingsStore = useSettingsStore();
+const session = useTrainingSession();
+
+// Start session immediately
+session.startSession(settingsStore.$state);
+
+watch(() => session.status.value, (newStatus) => {
+  if (newStatus === 'completed') {
+    const record = session.getRecord();
+    if (record) statsService.saveRecord(record);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (session.status.value === 'running' || session.status.value === 'paused') {
+    session.stopSession();
+    const record = session.getRecord();
+    if (record) statsService.saveRecord(record);
+  }
+});
+
+const formatTime = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+const handleBack = () => {
+  if (session.status.value === 'running') {
+    if (!confirm('训练正在进行中，确定要退出吗？')) return;
+  }
+  router.push('/');
+};
+
+const togglePause = () => {
+  if (session.status.value === 'running') {
+    session.pauseSession();
+  } else if (session.status.value === 'paused') {
+    session.resumeSession();
+  }
+};
+</script>
+
+<template>
+  <div class="flex-1 flex flex-col pt-2 pb-2 h-full">
+    <!-- Header Controls -->
+    <div class="flex justify-between items-center mb-6">
+      <button @click="handleBack" class="p-2 -ml-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <Icon icon="mdi:arrow-left" class="w-6 h-6" />
+      </button>
+      
+      <div class="text-sm font-medium text-slate-500 flex items-center gap-4">
+        <span v-if="session.status.value !== 'completed'">
+          轮次: {{ session.currentRound.value }} / {{ session.totalRounds.value }}
+        </span>
+        <span v-else class="text-primary font-bold">训练完成</span>
+        
+        <span v-if="session.currentPhase.value === 'dynamic'" class="text-primary font-bold font-mono text-lg bg-primary/10 px-3 py-1 rounded-md">
+          {{ session.currentCycles.value }} / {{ settingsStore.cycles }} 次
+        </span>
+      </div>
+
+      <button 
+        v-if="session.status.value === 'running' || session.status.value === 'paused'"
+        @click="togglePause" 
+        class="p-2 -mr-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+      >
+        <Icon :icon="session.status.value === 'running' ? 'mdi:pause' : 'mdi:play'" class="w-6 h-6" />
+      </button>
+      <div v-else class="w-10"></div>
+    </div>
+
+    <!-- Main Visual Area -->
+    <div class="flex-1 flex flex-col mb-2 relative min-h-0">
+      
+      <div v-if="session.currentPhase.value === 'rest'" class="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+        <div class="text-7xl font-black text-slate-800 dark:text-slate-100 mb-6 font-mono tracking-tighter opacity-50">
+          {{ formatTime(session.timeLeftSec.value) }}
+        </div>
+        <div class="text-xl font-medium text-primary">请闭眼休息，放松眼部肌肉</div>
+      </div>
+
+      <div v-else-if="session.currentPhase.value !== 'completed'" class="flex-1 flex flex-col relative">
+        <StereoCanvas 
+          :mode="settingsStore.stereoMode"
+          :is-dynamic="session.currentPhase.value === 'dynamic'"
+          :intensity="settingsStore.parallaxIntensity"
+          :speed="settingsStore.speed"
+          :is-paused="session.status.value === 'paused'"
+          @cycle="session.setCycle"
+        />
+
+        <div v-if="session.status.value === 'paused'" class="absolute inset-0 flex items-center justify-center bg-slate-900/10 dark:bg-slate-900/40 backdrop-blur-[2px] z-10 rounded-xl">
+          <div class="text-2xl font-bold tracking-widest text-slate-700 dark:text-slate-300">已暂停</div>
+        </div>
+
+        <!-- Instructions Panel (Only visible during locking) -->
+        <div v-if="session.currentPhase.value === 'locking'" class="fixed inset-x-0 bottom-8 flex flex-col items-center justify-center z-20 pointer-events-none px-4">
+          <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700/50 p-6 rounded-2xl shadow-2xl max-w-md w-full mx-auto text-center pointer-events-auto">
+            <div class="text-lg font-medium text-slate-100 mb-2">
+              请使用 <span class="text-primary">{{ settingsStore.stereoMode === 'cross' ? '交叉眼 (斗鸡眼)' : '平行眼 (发呆)' }}</span> 对焦
+            </div>
+            <div class="text-sm text-slate-400 mb-6">
+              调节双眼视线，直到屏幕中间浮现出第三个清晰的立体图像。当你能够稳定锁定它时，点击下方按钮。
+            </div>
+            <button @click="session.confirmLock" class="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 animate-pulse w-full">
+              我已经看到 3D 图像了 (开始动态拉伸)
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div v-else class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <Icon icon="mdi:check-circle" class="w-24 h-24 text-primary mx-auto mb-4" />
+          <div class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">训练完成</div>
+          <div class="text-slate-500 mb-8">做得好！你的眼睛得到了很好的锻炼。</div>
+          <button @click="router.push('/')" class="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors">
+            返回首页
+          </button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</template>
+
