@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #4ade80; /* green-400 */
-  --primary-hover: #22c55e; /* green-500 */
-  --bg-color: #f8fafc; /* slate-50 */
-  --text-color: #334155; /* slate-700 */
+  /* Vibrant Indigo to Violet primary accents */
+  --primary: #6366f1; /* indigo-500 */
+  --primary-hover: #4f46e5; /* indigo-600 */
+  --bg-color: #fafafa; /* ultra light clean bg */
+  --text-color: #18181b; /* zinc-900 */
 }
 
 @theme {
@@ -15,13 +16,18 @@
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  /* Modern geometric sans-serif font */
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  /* Very subtle gradient texture for light mode */
+  background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
 }
 
 .dark body {
-  --bg-color: #0f172a; /* slate-900 */
-  --text-color: #e2e8f0; /* slate-200 */
+  /* Deep, premium dark mode */
+  --bg-color: #09090b; /* zinc-950 */
+  --text-color: #f4f4f5; /* zinc-100 */
+  background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,0.1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, transparent 50%);
 }

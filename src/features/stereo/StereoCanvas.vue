@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { i18n } from '../../i18n';
 
 const props = defineProps<{
   mode: 'cross' | 'parallel';
@@ -7,6 +8,11 @@ const props = defineProps<{
   intensity: number;
   speed: number;
   isPaused: boolean;
+  minDistance: number;
+  maxDistance: number;
+  usePhysicalCalibration: boolean;
+  userIPD: number;
+  screenDiagonal: number;
 }>();
 
 const emit = defineEmits<{
@@ -56,12 +62,16 @@ const drawBackground = (ctx: CanvasRenderingContext2D) => {
   ctx.strokeStyle = '#334155';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(-2000, 0);
-  for (let x = -2000; x <= 2000; x += 150) {
-    let height = -30 - Math.abs(Math.sin(x * 0.01)) * 100;
+  ctx.moveTo(-4000, 0);
+  for (let x = -4000; x <= 4000; x += 150) {
+    // Asymmetric mountain generation using multiple sine waves
+    let wave1 = Math.sin(x * 0.005);
+    let wave2 = Math.cos(x * 0.011 + 1.5);
+    let wave3 = Math.sin(x * 0.02 + 0.5);
+    let height = -50 - (wave1 + wave2 * 0.5 + wave3 * 0.25) * 40;
     ctx.lineTo(x, height);
   }
-  ctx.lineTo(2000, 0);
+  ctx.lineTo(4000, 0);
   ctx.stroke();
 
   // Horizon Line
@@ -203,6 +213,7 @@ const drawBeautifulHouse = (ctx: CanvasRenderingContext2D, isLeft: boolean, camZ
   ctx.fill(); ctx.stroke();
 
   ctx.restore();
+
 };
 
 const render = () => {
@@ -225,15 +236,43 @@ const render = () => {
   let minSeparation = 120;
   let maxSeparation = 250;
 
-  if (props.mode === 'parallel') {
-    // Parallel: max separation is limited by physical IPD (~60mm)
-    // On average monitors, 250-300px is safe.
-    minSeparation = 80;
-    maxSeparation = 80 + 220 * props.intensity;
+  if (props.usePhysicalCalibration) {
+    // Physical calibration mode
+    // screen.width/height is the CSS pixel resolution
+    const cssWidth = window.screen.width;
+    const cssHeight = window.screen.height;
+    const cssDiagonal = Math.sqrt(cssWidth * cssWidth + cssHeight * cssHeight);
+    
+    // Diagonal in mm
+    const physicalDiagonalMm = props.screenDiagonal * 25.4;
+    
+    // Calculate how many CSS pixels represent 1 mm
+    const pixelsPerMm = cssDiagonal / physicalDiagonalMm;
+    
+    // Calculate exact IPD in pixels
+    const ipdPixels = props.userIPD * pixelsPerMm;
+
+    if (props.mode === 'parallel') {
+      // For parallel, max separation (infinity) is exactly the user's IPD
+      // Min separation can be a bit closer (e.g. 50% of IPD)
+      maxSeparation = ipdPixels;
+      minSeparation = ipdPixels * 0.4;
+    } else {
+      // For cross mode, IPD dictates the realistic scale.
+      // At infinity (minSeparation), it's still IPD.
+      minSeparation = ipdPixels;
+      // Max separation can be larger
+      maxSeparation = ipdPixels + (width * 0.3);
+    }
   } else {
-    // Cross: can go much wider. Let's use screen width for massive depth!
-    minSeparation = 100;
-    maxSeparation = 100 + Math.min(width * 0.5, 600) * props.intensity;
+    // Legacy intensity mode
+    if (props.mode === 'parallel') {
+      minSeparation = 80;
+      maxSeparation = 80 + 220 * props.intensity;
+    } else {
+      minSeparation = 100;
+      maxSeparation = 100 + Math.min(width * 0.5, 600) * props.intensity;
+    }
   }
 
   if (props.isDynamic && !props.isPaused) {
@@ -264,11 +303,13 @@ const render = () => {
   const houseZ = 50; 
   let simulatedDistance = 0; // The actual Z_rel distance
 
-  // We set distance range to 10m ~ 50m. This gives a comfortable 5x scale factor.
+  // We use the configured distance range from props.
+  const distanceRange = props.maxDistance - props.minDistance;
+  
   if (props.mode === 'parallel') {
-    simulatedDistance = 10 + wave * 40; // 10 to 50
+    simulatedDistance = props.minDistance + wave * distanceRange; 
   } else {
-    simulatedDistance = 50 - wave * 40; // 50 to 10
+    simulatedDistance = props.maxDistance - wave * distanceRange;
   }
 
   // Camera moves to maintain simulatedDistance from the house
@@ -292,6 +333,9 @@ const render = () => {
 
   // Draw Left Eye View
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, width / 2, height);
+  ctx.clip();
   ctx.globalCompositeOperation = 'screen'; // Environment is additive
   ctx.translate(leftCenter, centerY);
   drawBackground(ctx);
@@ -302,12 +346,25 @@ const render = () => {
 
   // Draw Right Eye View
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(width / 2, 0, width / 2, height);
+  ctx.clip();
   ctx.globalCompositeOperation = 'screen'; // Environment is additive
   ctx.translate(rightCenter, centerY);
   drawBackground(ctx);
   drawGround(ctx, false, camZ, physicalIPD);
   ctx.globalCompositeOperation = 'source-over'; // House is solid color
   drawBeautifulHouse(ctx, false, camZ, houseZ, visualScale, physicalIPD);
+  ctx.restore();
+
+  // Draw a subtle center divider to help visually separate the viewports
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(centerX, 0);
+  ctx.lineTo(centerX, height);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
   ctx.restore();
 
   // Draw alignment dots (helps with initial lock)
@@ -326,7 +383,8 @@ const render = () => {
     ctx.font = '14px monospace';
     ctx.textAlign = 'right';
     const distText = simulatedDistance.toFixed(1) + 'm';
-    ctx.fillText(`模拟视距: ${distText}`, width - 20, height - 20);
+    const label = i18n.global.t('training.canvas.distance');
+    ctx.fillText(`${label}: ${distText}`, width - 20, height - 20);
   }
 
   animationFrameId = requestAnimationFrame(render);

@@ -4,12 +4,17 @@ import type { UserSettings } from '../training/types';
 const STORAGE_KEY = 'focusfar_user_settings';
 
 const defaultSettings: UserSettings = {
-  stereoMode: 'cross',
-  parallaxIntensity: 0.5,
+  stereoMode: 'parallel',
+  parallaxIntensity: 1.0,
   speed: 0.3,
   cycles: 20,
   rounds: 3,
   restSec: 10,
+  minDistance: 10,
+  maxDistance: 250,
+  usePhysicalCalibration: true,
+  userIPD: 63,
+  screenDiagonal: 24,
 };
 
 export const useSettingsStore = defineStore('settings', {

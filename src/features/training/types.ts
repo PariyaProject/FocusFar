@@ -33,4 +33,9 @@ export interface UserSettings {
   cycles: number;
   rounds: number;
   restSec: number;
+  minDistance: number;
+  maxDistance: number;
+  usePhysicalCalibration: boolean;
+  userIPD: number;
+  screenDiagonal: number;
 }
