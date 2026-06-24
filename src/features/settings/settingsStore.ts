@@ -4,6 +4,7 @@ import type { UserSettings } from '../training/types';
 const STORAGE_KEY = 'focusfar_user_settings';
 
 const defaultSettings: UserSettings = {
+  renderEngine: '2d',
   stereoMode: 'parallel',
   parallaxIntensity: 1.0,
   speed: 0.3,

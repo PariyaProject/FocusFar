@@ -27,6 +27,7 @@ export interface TrainingRecord {
 }
 
 export interface UserSettings {
+  renderEngine: '2d' | '3d';
   stereoMode: StereoMode;
   parallaxIntensity: number;
   speed: number;

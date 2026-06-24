@@ -5,7 +5,8 @@ import { useI18n } from 'vue-i18n';
 import { useTrainingSession } from '../features/training/composables/useTrainingSession';
 import { useSettingsStore } from '../features/settings/settingsStore';
 import { statsService } from '../features/stats/statsService';
-import StereoCanvas from '../features/stereo/StereoCanvas.vue';
+import StereoCanvas2D from '../features/stereo/StereoCanvas2D.vue';
+import StereoCanvas3D from '../features/stereo/StereoCanvas3D.vue';
 import { Icon } from '@iconify/vue';
 
 const router = useRouter();
@@ -90,19 +91,36 @@ const togglePause = () => {
       </div>
 
       <div v-else-if="session.currentPhase.value !== 'completed'" class="flex-1 flex flex-col relative">
-        <StereoCanvas 
-          :mode="settingsStore.stereoMode"
-          :is-dynamic="session.currentPhase.value === 'dynamic'"
-          :intensity="settingsStore.parallaxIntensity"
-          :speed="settingsStore.speed"
-          :is-paused="session.status.value === 'paused'"
-          :min-distance="settingsStore.minDistance"
-          :max-distance="settingsStore.maxDistance"
-          :use-physical-calibration="settingsStore.usePhysicalCalibration"
-          :userIPD="settingsStore.userIPD"
-          :screen-diagonal="settingsStore.screenDiagonal"
-          @cycle="session.setCycle"
-        />
+        <div class="flex-1 min-h-0 flex flex-col relative w-full h-full">
+          <StereoCanvas2D 
+            v-if="settingsStore.renderEngine === '2d'"
+            :mode="settingsStore.stereoMode"
+            :is-dynamic="session.currentPhase.value === 'dynamic'"
+            :intensity="settingsStore.parallaxIntensity"
+            :speed="settingsStore.speed"
+            :is-paused="session.status.value === 'paused'"
+            :min-distance="settingsStore.minDistance"
+            :max-distance="settingsStore.maxDistance"
+            :use-physical-calibration="settingsStore.usePhysicalCalibration"
+            :userIPD="settingsStore.userIPD"
+            :screen-diagonal="settingsStore.screenDiagonal"
+            @cycle="session.setCycle"
+          />
+          <StereoCanvas3D 
+            v-else
+            :mode="settingsStore.stereoMode"
+            :is-dynamic="session.currentPhase.value === 'dynamic'"
+            :intensity="settingsStore.parallaxIntensity"
+            :speed="settingsStore.speed"
+            :is-paused="session.status.value === 'paused'"
+            :min-distance="settingsStore.minDistance"
+            :max-distance="settingsStore.maxDistance"
+            :use-physical-calibration="settingsStore.usePhysicalCalibration"
+            :userIPD="settingsStore.userIPD"
+            :screen-diagonal="settingsStore.screenDiagonal"
+            @cycle="session.setCycle"
+          />
+        </div>
 
         <div v-if="session.status.value === 'paused'" class="absolute inset-0 flex items-center justify-center bg-slate-900/10 dark:bg-slate-900/40 backdrop-blur-[2px] z-10 rounded-xl">
           <div class="text-2xl font-bold tracking-widest text-slate-700 dark:text-slate-300">{{ t('training.paused') }}</div>

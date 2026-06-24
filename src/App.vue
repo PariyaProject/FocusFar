@@ -7,12 +7,15 @@ import { storeToRefs } from 'pinia'
 
 const { t, locale } = useI18n()
 const settingsStore = useSettingsStore()
-const { stereoMode } = storeToRefs(settingsStore)
-
-
+const { stereoMode, renderEngine } = storeToRefs(settingsStore)
 
 const setViewMode = (mode: 'cross' | 'parallel') => {
   stereoMode.value = mode
+  settingsStore.saveSettings()
+}
+
+const setRenderEngine = (engine: '2d' | '3d') => {
+  renderEngine.value = engine
   settingsStore.saveSettings()
 }
 </script>
@@ -20,11 +23,28 @@ const setViewMode = (mode: 'cross' | 'parallel') => {
 <template>
   <div class="min-h-screen flex flex-col">
     <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-black/50 border-b border-slate-200/50 dark:border-white/10 transition-colors">
-      <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <RouterLink to="/" class="text-xl font-bold text-primary flex items-center gap-2">
           {{ t('app.title') }}
         </RouterLink>
         <div class="flex items-center gap-4">
+          <!-- Render Engine Toggle -->
+          <div class="flex bg-slate-100 dark:bg-slate-700 p-0.5 rounded-lg border border-slate-200 dark:border-slate-600">
+            <button 
+              @click="setRenderEngine('2d')" 
+              :class="['text-xs font-medium px-2 py-1 rounded-md transition-colors', renderEngine === '2d' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
+            >
+              2D
+            </button>
+            <button 
+              @click="setRenderEngine('3d')" 
+              :class="['text-xs font-medium px-2 py-1 rounded-md transition-colors', renderEngine === '3d' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300']"
+            >
+              3D
+            </button>
+          </div>
+          
+          <!-- Stereo Mode Toggle -->
           <div class="flex bg-slate-100 dark:bg-slate-700 p-0.5 rounded-lg border border-slate-200 dark:border-slate-600">
             <button 
               @click="setViewMode('parallel')" 
@@ -61,7 +81,7 @@ const setViewMode = (mode: 'cross' | 'parallel') => {
       </div>
     </header>
 
-    <main class="flex-1 max-w-3xl w-full mx-auto p-4 flex flex-col">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col">
       <RouterView />
     </main>
 

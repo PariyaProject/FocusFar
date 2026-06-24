@@ -35,21 +35,22 @@ watch(() => props.isDynamic, (newVal) => {
 const focalLength = 600; // Pixels (determines Field of View)
 const cameraY = 1.5; // Meters (Camera height above ground)
 
-const drawBackground = (ctx: CanvasRenderingContext2D) => {
+const drawBackground = (ctx: CanvasRenderingContext2D, period: number) => {
   // Stars at infinity
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  for (let i = 0; i < 150; i++) {
-    let rx = (Math.sin(i * 1234) * 1500);
-    let ry = -20 - (Math.cos(i * 4321) * 800);
+  for (let i = 0; i < 40; i++) {
+    let rx_base = (Math.sin(i * 1234) * 0.5 + 0.5) * period; 
+    let ry = -20 - ((Math.cos(i * 4321) * 0.5 + 0.5) * 800);
     if (ry < -50) {
-      // Stars are at infinity, so parallax is always 0 relative to local center
-      ctx.beginPath(); 
-      ctx.arc(rx, ry, Math.abs(Math.sin(i)) * 1.5 + 0.5, 0, 7); 
-      ctx.fill();
+      for (let k = Math.floor(-4000 / period); k <= Math.ceil(4000 / period); k++) {
+        ctx.beginPath(); 
+        ctx.arc(rx_base + k * period, ry, Math.abs(Math.sin(i)) * 1.5 + 0.5, 0, 7); 
+        ctx.fill();
+      }
     }
   }
 
-  // Glowing Sun at infinity (moved higher up to prevent washing out the house)
+  // Glowing Moon at infinity
   ctx.beginPath();
   ctx.arc(0, -70, 40, 0, 7);
   ctx.fillStyle = '#fde047';
@@ -63,11 +64,12 @@ const drawBackground = (ctx: CanvasRenderingContext2D) => {
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(-4000, 0);
-  for (let x = -4000; x <= 4000; x += 150) {
-    // Asymmetric mountain generation using multiple sine waves
-    let wave1 = Math.sin(x * 0.005);
-    let wave2 = Math.cos(x * 0.011 + 1.5);
-    let wave3 = Math.sin(x * 0.02 + 0.5);
+  for (let x = -4000; x <= 4000; x += 15) { // finer steps for smooth curve
+    let px = (x % period + period) % period; 
+    let phase = (px / period) * Math.PI * 2;
+    let wave1 = Math.sin(phase);
+    let wave2 = Math.cos(phase * 2 + 1.5);
+    let wave3 = Math.sin(phase * 3 + 0.5);
     let height = -50 - (wave1 + wave2 * 0.5 + wave3 * 0.25) * 40;
     ctx.lineTo(x, height);
   }
@@ -76,7 +78,7 @@ const drawBackground = (ctx: CanvasRenderingContext2D) => {
 
   // Horizon Line
   ctx.strokeStyle = '#475569';
-  ctx.beginPath(); ctx.moveTo(-2000, 0); ctx.lineTo(2000, 0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-4000, 0); ctx.lineTo(4000, 0); ctx.stroke();
 };
 
 const drawGround = (ctx: CanvasRenderingContext2D, isLeft: boolean, camZ: number, physicalIPD: number) => {
@@ -154,6 +156,83 @@ const drawGround = (ctx: CanvasRenderingContext2D, isLeft: boolean, camZ: number
     }
   }
   ctx.stroke();
+
+  // Square Frames
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)'; // Light blue wireframe
+  ctx.lineWidth = 1.5;
+  let frameStartZ = Math.floor((camZ + 1.0) / 40) * 40;
+  for (let z = frameStartZ; z < camZ + 800; z += 40) {
+    let pLeftBottom = project(-8, cameraY, z);
+    let pLeftTop = project(-8, cameraY - 10, z);
+    let pRightTop = project(8, cameraY - 10, z);
+    let pRightBottom = project(8, cameraY, z);
+    if (pLeftBottom && pLeftTop && pRightTop && pRightBottom) {
+      ctx.beginPath();
+      ctx.moveTo(pLeftBottom.x, pLeftBottom.y);
+      ctx.lineTo(pLeftTop.x, pLeftTop.y);
+      ctx.lineTo(pRightTop.x, pRightTop.y);
+      ctx.lineTo(pRightBottom.x, pRightBottom.y);
+      ctx.stroke();
+    }
+  }
+
+  // Trees (Wireframe Triangles)
+  ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)'; // Green wireframe
+  ctx.lineWidth = 1.5;
+  let treeStartZ = Math.floor((camZ + 1.0) / 30) * 30;
+  for (let z = treeStartZ; z < camZ + 800; z += 30) {
+    [-12, 12].forEach(X => {
+      let baseY = cameraY;
+      let topY = cameraY - 10;
+      let topP = project(X, topY, z);
+      let leftP = project(X - 2.5, baseY, z);
+      let rightP = project(X + 2.5, baseY, z);
+      if (topP && leftP && rightP) {
+        ctx.beginPath();
+        ctx.moveTo(topP.x, topP.y);
+        ctx.lineTo(leftP.x, leftP.y);
+        ctx.lineTo(rightP.x, rightP.y);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    });
+  }
+
+  // Particles (Fireflies with reciprocating effect)
+  ctx.fillStyle = 'rgba(253, 224, 71, 0.6)'; // Yellow dots
+  for (let i = 0; i < 300; i++) {
+    let rand1 = Math.sin(i * 12.9898) * 43758.5453; rand1 = rand1 - Math.floor(rand1);
+    let rand2 = Math.sin(i * 78.233) * 43758.5453; rand2 = rand2 - Math.floor(rand2);
+    let rand3 = Math.sin(i * 39.813) * 43758.5453; rand3 = rand3 - Math.floor(rand3);
+    
+    let baseX = (rand1 - 0.5) * 80;
+    let baseY = cameraY - 30 * rand2;
+    let baseZ = rand3 * 1000;
+    
+    // Sway back and forth
+    let zSway = Math.sin(time * 0.5 + rand1 * Math.PI * 2) * 60;
+    let xSway = Math.cos(time * 0.3 + rand2 * Math.PI * 2) * 5;
+    let ySway = Math.sin(time * 0.4 + rand3 * Math.PI * 2) * 2;
+    
+    let X = baseX + xSway;
+    let Y = baseY + ySway;
+    let z = baseZ + zSway;
+    
+    // Keep within view relative to camera
+    let relZ = (z - camZ) % 1000;
+    if (relZ < 0) relZ += 1000;
+    let finalZ = camZ + relZ;
+    
+    let p = project(X, Y, finalZ);
+    if (p) {
+      ctx.beginPath();
+      // Size gets larger as it gets closer
+      let size = focalLength * 0.15 / Math.max(0.1, finalZ - camZ);
+      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
 };
 
 const drawBeautifulHouse = (ctx: CanvasRenderingContext2D, isLeft: boolean, camZ: number, houseZ: number, visualScale: number, physicalIPD: number) => {
@@ -338,7 +417,7 @@ const render = () => {
   ctx.clip();
   ctx.globalCompositeOperation = 'screen'; // Environment is additive
   ctx.translate(leftCenter, centerY);
-  drawBackground(ctx);
+  drawBackground(ctx, viewportDistance);
   drawGround(ctx, true, camZ, physicalIPD);
   ctx.globalCompositeOperation = 'source-over'; // House is solid color
   drawBeautifulHouse(ctx, true, camZ, houseZ, visualScale, physicalIPD);
@@ -351,31 +430,13 @@ const render = () => {
   ctx.clip();
   ctx.globalCompositeOperation = 'screen'; // Environment is additive
   ctx.translate(rightCenter, centerY);
-  drawBackground(ctx);
+  drawBackground(ctx, viewportDistance);
   drawGround(ctx, false, camZ, physicalIPD);
   ctx.globalCompositeOperation = 'source-over'; // House is solid color
   drawBeautifulHouse(ctx, false, camZ, houseZ, visualScale, physicalIPD);
   ctx.restore();
 
-  // Draw a subtle center divider to help visually separate the viewports
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(centerX, 0);
-  ctx.lineTo(centerX, height);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.restore();
 
-  // Draw alignment dots (helps with initial lock)
-  // Dots sit exactly below the house
-  const dotY = centerY + 100 * visualScale;
-  const houseProjLeft = focalLength * (physicalIPD / 2) / simulatedDistance;
-  const houseProjRight = focalLength * (-physicalIPD / 2) / simulatedDistance;
-  const leftX = leftCenter + houseProjLeft;
-  const rightX = rightCenter + houseProjRight;
-  ctx.beginPath(); ctx.arc(leftX, dotY, 4 * Math.min(1.5, visualScale), 0, Math.PI*2); ctx.fillStyle = '#cbd5e1'; ctx.fill();
-  ctx.beginPath(); ctx.arc(rightX, dotY, 4 * Math.min(1.5, visualScale), 0, Math.PI*2); ctx.fillStyle = '#cbd5e1'; ctx.fill();
 
   // Draw unobtrusive text in bottom right corner
   if (props.isDynamic) {
