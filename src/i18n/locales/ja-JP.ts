@@ -51,13 +51,14 @@ export default {
       ipd: '実際の瞳孔間距離 (mm)',
       ipdDesc: '成人の平均は 55 ～ 75',
       screen: 'モニターサイズ (インチ)',
-      screenDesc: '実際の物理ピクセル比を計算するために使用されます'
+      screenDesc: 'スマホ：約6.1〜6.8、PC：24〜27。ブラウザ制限のため手動入力が必要です'
     }
   },
   training: {
     rotate: {
       title: 'Please rotate your device',
-      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.'
+      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.',
+      autoRotate: 'クリックして自動回転（全画面）'
     },
     confirmExit: 'トレーニング中です。終了してもよろしいですか？',
     round: 'ラウンド',

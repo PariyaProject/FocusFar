@@ -51,13 +51,14 @@ export default {
       ipd: 'Su IPD Real (mm)',
       ipdDesc: 'El promedio en adultos es de 55 a 75',
       screen: 'Tamaño del Monitor (pulgadas)',
-      screenDesc: 'Se usa para calcular la relación de píxeles físicos'
+      screenDesc: 'Móviles: ~6.1-6.8, Monitores: 24-27. Manual debido a límites del navegador'
     }
   },
   training: {
     rotate: {
       title: 'Please rotate your device',
-      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.'
+      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.',
+      autoRotate: 'Rotar automáticamente'
     },
     confirmExit: 'El entrenamiento está en curso. ¿Seguro que quieres salir?',
     round: 'Ronda',

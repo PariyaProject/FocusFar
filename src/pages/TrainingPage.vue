@@ -43,6 +43,7 @@ onBeforeUnmount(() => {
     const record = session.getRecord();
     if (record) statsService.saveRecord(record);
   }
+  exitFullscreenAndUnlock();
 });
 
 const formatTime = (seconds: number) => {
@@ -51,10 +52,38 @@ const formatTime = (seconds: number) => {
   return `${m}:${s.toString().padStart(2, '0')}`;
 };
 
-const handleBack = () => {
+const exitFullscreenAndUnlock = async () => {
+  try {
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+  } catch (err) {
+    console.warn("Exit fullscreen or orientation unlock failed", err);
+  }
+};
+
+const enterFullscreenAndLandscape = async () => {
+  try {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      await elem.requestFullscreen();
+    }
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock('landscape');
+    }
+  } catch (err) {
+    console.warn("Fullscreen or orientation lock failed", err);
+  }
+};
+
+const handleBack = async () => {
   if (session.status.value === 'running') {
     if (!confirm(t('training.confirmExit'))) return;
   }
+  await exitFullscreenAndUnlock();
   router.push('/');
 };
 
@@ -101,17 +130,22 @@ const togglePause = () => {
       <div v-if="isPortrait" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900/95 backdrop-blur-md rounded-2xl text-white p-6 text-center border border-slate-700">
         <Icon icon="mdi:phone-rotate-landscape" class="w-24 h-24 mb-6 text-primary animate-bounce" />
         <h2 class="text-xl sm:text-2xl font-bold mb-4">{{ t('training.rotate.title') }}</h2>
-        <p class="text-sm sm:text-base text-slate-300 max-w-sm leading-relaxed">{{ t('training.rotate.desc') }}</p>
+        <p class="text-sm sm:text-base text-slate-300 max-w-sm leading-relaxed mb-8">{{ t('training.rotate.desc') }}</p>
+        
+        <button @click="enterFullscreenAndLandscape" class="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2">
+          <Icon icon="mdi:fullscreen" class="w-6 h-6" />
+          {{ t('training.rotate.autoRotate') }}
+        </button>
       </div>
 
-      <div v-if="session.currentPhase.value === 'rest'" class="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+      <div v-if="session.currentPhase.value === 'rest'" v-show="!isPortrait" class="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
         <div class="text-7xl font-black text-slate-800 dark:text-slate-100 mb-6 font-mono tracking-tighter opacity-50">
           {{ formatTime(session.timeLeftSec.value) }}
         </div>
         <div class="text-xl font-medium text-primary">{{ t('training.rest') }}</div>
       </div>
 
-      <div v-else-if="session.currentPhase.value !== 'completed'" class="flex-1 flex flex-col relative">
+      <div v-else-if="session.currentPhase.value !== 'completed'" v-show="!isPortrait" class="flex-1 flex flex-col relative">
         <div class="flex-1 min-h-0 flex flex-col relative w-full h-full">
           <StereoCanvas2D 
             v-if="settingsStore.renderEngine === '2d'"
@@ -162,12 +196,12 @@ const togglePause = () => {
         </div>
       </div>
       
-      <div v-else class="flex-1 flex items-center justify-center">
+      <div v-else v-show="!isPortrait" class="flex-1 flex items-center justify-center">
         <div class="text-center">
           <Icon icon="mdi:check-circle" class="w-24 h-24 text-primary mx-auto mb-4" />
           <div class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">{{ t('training.done.title') }}</div>
           <div class="text-slate-500 mb-8">{{ t('training.done.desc') }}</div>
-          <button @click="router.push('/')" class="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors">
+          <button @click="handleBack" class="bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors">
             {{ t('training.done.back') }}
           </button>
         </div>

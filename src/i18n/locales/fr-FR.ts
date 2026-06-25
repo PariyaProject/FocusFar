@@ -14,12 +14,13 @@ export default {
     title: 'Paramètres d\'entraînement', save: 'Enregistrer', saved: 'Paramètres enregistrés', reset: 'Réinitialiser', confirmReset: 'Voulez-vous vraiment réinitialiser les paramètres par défaut ?',
     mode: { title: 'Mode 3D à l\'œil nu', focusMethod: 'Méthode de Mise au Point', crossTitle: 'Vision Croisée', crossDesc: 'Les yeux convergent devant l\'écran', parallelTitle: 'Vision Parallèle', parallelDesc: 'Les yeux divergent derrière l\'écran', intensity: 'Intensité de la Parallaxe', speed: 'Vitesse d\'Animation' },
     process: { title: 'Paramètres du Processus', cycles: 'Étirements par Tour', rounds: 'Tours Totaux', restSec: 'Durée de Repos (sec)', minDistance: 'Distance Min (m)', maxDistance: 'Distance Max (m)' },
-    calibration: { title: 'Calibration Physique', use: 'Activer la Calibration Physique', ipd: 'Votre vrai IPD (mm)', ipdDesc: 'La moyenne est de 55 - 75', screen: 'Taille de l\'écran (pouces)', screenDesc: 'Pour calculer la vraie taille des pixels' }
+    calibration: { title: 'Calibration Physique', use: 'Activer la Calibration Physique', ipd: 'Votre vrai IPD (mm)', ipdDesc: 'La moyenne est de 55 - 75', screen: 'Taille de l\'écran (pouces)', screenDesc: 'Mobiles : ~6.1-6.8, Écrans : 24-27. Manuel en raison des limites du navigateur' }
   },
   training: {
     rotate: {
       title: 'Please rotate your device',
-      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.'
+      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.',
+      autoRotate: 'Pivoter automatiquement'
     },
     confirmExit: 'Entraînement en cours. Voulez-vous vraiment quitter ?', round: 'Tour', completed: 'Entraînement Terminé', times: 'fois', rest: 'Veuillez fermer les yeux et détendre vos muscles oculaires', paused: 'En pause',
     locking: { instruction: 'Veuillez utiliser la {mode} pour faire la mise au point', cross: 'Vision Croisée', parallel: 'Vision Parallèle', desc: 'Ajustez votre regard jusqu\'à ce qu\'une troisième image 3D claire apparaisse au milieu de l\'écran. Cliquez sur le bouton ci-dessous lorsque vous pouvez la verrouiller de manière stable.', confirm: 'Je vois l\'image 3D (Démarrer l\'étirement dynamique)' },

@@ -51,13 +51,14 @@ export default {
       ipd: 'Your Real IPD (mm)',
       ipdDesc: 'Adult average is 55 - 75',
       screen: 'Monitor Size (inches)',
-      screenDesc: 'Used to calculate true physical pixel ratio'
+      screenDesc: 'Phones: ~6.1-6.8, Monitors: 24-27. Must be set manually due to browser limits'
     }
   },
   training: {
     rotate: {
       title: 'Please rotate your device',
-      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.'
+      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.',
+      autoRotate: 'Click to Auto Rotate'
     },
     confirmExit: 'Training is in progress. Are you sure you want to exit?',
     round: 'Round',

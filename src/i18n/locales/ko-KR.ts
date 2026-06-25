@@ -51,13 +51,14 @@ export default {
       ipd: '실제 동공 간 거리 (mm)',
       ipdDesc: '성인 평균 55 - 75',
       screen: '모니터 크기 (인치)',
-      screenDesc: '실제 물리적 픽셀 비율을 계산하는 데 사용됨'
+      screenDesc: '스마트폰: 약 6.1-6.8, 모니터: 24-27. 브라우저 제한으로 수동 입력 필수'
     }
   },
   training: {
     rotate: {
       title: 'Please rotate your device',
-      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.'
+      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.',
+      autoRotate: '자동 회전 (전체 화면)'
     },
     confirmExit: '훈련이 진행 중입니다. 정말 종료하시겠습니까?',
     round: '라운드',

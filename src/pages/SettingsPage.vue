@@ -53,12 +53,37 @@ const reset = () => {
             </div>
           </div>
           
-          <div v-if="!usePhysicalCalibration">
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex justify-between">
-              <span>{{ t('settings.mode.intensity') }}</span>
-              <span>{{ (parallaxIntensity * 100).toFixed(0) }}%</span>
-            </label>
-            <input type="range" v-model.number="parallaxIntensity" min="0.1" max="1.0" step="0.1" class="w-full accent-primary" />
+          <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-slate-700 dark:text-slate-300">{{ t('settings.calibration.title') }}</span>
+              <label class="relative inline-flex items-center cursor-pointer" :title="t('settings.calibration.use')">
+                <input type="checkbox" v-model="usePhysicalCalibration" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
+              </label>
+            </div>
+
+            <div v-if="!usePhysicalCalibration" class="pt-2 border-t border-slate-200 dark:border-slate-600">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex justify-between">
+                <span>{{ t('settings.mode.intensity') }}</span>
+                <span>{{ (parallaxIntensity * 100).toFixed(0) }}%</span>
+              </label>
+              <input type="range" v-model.number="parallaxIntensity" min="0.1" max="1.0" step="0.1" class="w-full accent-primary" />
+            </div>
+            
+            <div v-if="usePhysicalCalibration" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-slate-600">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ t('settings.calibration.ipd') }}</label>
+                <input type="number" v-model.number="userIPD" min="40" max="80" step="1"
+                  class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:border-primary" />
+                <div class="text-xs text-slate-500 mt-1">{{ t('settings.calibration.ipdDesc') }}</div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ t('settings.calibration.screen') }}</label>
+                <input type="number" v-model.number="screenDiagonal" min="10" max="100" step="0.1"
+                  class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:border-primary" />
+                <div class="text-xs text-slate-500 mt-1">{{ t('settings.calibration.screenDesc') }}</div>
+              </div>
+            </div>
           </div>
 
           <div>
@@ -106,30 +131,7 @@ const reset = () => {
         </div>
       </section>
 
-      <section>
-        <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-700 pb-2">
-          <h2 class="text-lg font-semibold">{{ t('settings.calibration.title') }}</h2>
-          <label class="relative inline-flex items-center cursor-pointer" :title="t('settings.calibration.use')">
-            <input type="checkbox" v-model="usePhysicalCalibration" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
-          </label>
-        </div>
 
-        <div v-if="usePhysicalCalibration" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ t('settings.calibration.ipd') }}</label>
-            <input type="number" v-model.number="userIPD" min="40" max="80" step="1"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:border-primary" />
-            <div class="text-xs text-slate-500 mt-1">{{ t('settings.calibration.ipdDesc') }}</div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{{ t('settings.calibration.screen') }}</label>
-            <input type="number" v-model.number="screenDiagonal" min="10" max="100" step="0.1"
-              class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:border-primary" />
-            <div class="text-xs text-slate-500 mt-1">{{ t('settings.calibration.screenDesc') }}</div>
-          </div>
-        </div>
-      </section>
 
       <div class="pt-4 flex gap-4">
         <button @click="save" class="flex-1 bg-primary hover:bg-primary-hover text-white font-medium py-2 rounded-lg transition-colors">
