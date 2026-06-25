@@ -301,8 +301,9 @@ const render = () => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const width = canvas.width;
-  const height = canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  const width = canvas.width / dpr;
+  const height = canvas.height / dpr;
 
   // Clear screen ONCE with a unified solid dark background
   // This allows the left and right eyes to overlap without erasing each other's lines
@@ -317,16 +318,9 @@ const render = () => {
 
   if (props.usePhysicalCalibration) {
     // Physical calibration mode
-    // screen.width/height is the CSS pixel resolution
-    const cssWidth = window.screen.width;
-    const cssHeight = window.screen.height;
-    const cssDiagonal = Math.sqrt(cssWidth * cssWidth + cssHeight * cssHeight);
-    
-    // Diagonal in mm
-    const physicalDiagonalMm = props.screenDiagonal * 25.4;
-    
-    // Calculate how many CSS pixels represent 1 mm
-    const pixelsPerMm = cssDiagonal / physicalDiagonalMm;
+    // Use standard CSS pixel ratio (1 inch = 96 pixels) to ensure consistency 
+    // across devices and prevent the distance from changing when the canvas/window resizes.
+    const pixelsPerMm = 96 / 25.4;
     
     // Calculate exact IPD in pixels
     const ipdPixels = props.userIPD * pixelsPerMm;
@@ -341,16 +335,16 @@ const render = () => {
       // At infinity (minSeparation), it's still IPD.
       minSeparation = ipdPixels;
       // Max separation can be larger
-      maxSeparation = ipdPixels + (width * 0.3);
+      maxSeparation = ipdPixels + 250;
     }
   } else {
-    // Legacy intensity mode
+    // Legacy mapping
     if (props.mode === 'parallel') {
       minSeparation = 80;
       maxSeparation = 80 + 220 * props.intensity;
     } else {
       minSeparation = 100;
-      maxSeparation = 100 + Math.min(width * 0.5, 600) * props.intensity;
+      maxSeparation = 100 + 400 * props.intensity;
     }
   }
 

@@ -23,7 +23,7 @@ const startTraining = () => {
 <template>
   <div class="flex-1 flex flex-col items-center justify-center py-12">
     <div class="text-center mb-10">
-      <h1 class="text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-4 flex items-center justify-center gap-3">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-4 flex items-center justify-center gap-2 sm:gap-3">
         <Icon icon="mdi:eye-outline" class="text-primary w-10 h-10" />
         {{ t('app.title') }}
       </h1>
@@ -39,7 +39,7 @@ const startTraining = () => {
       </div>
 
       <button @click="startTraining" 
-        class="mt-8 group relative overflow-hidden bg-primary hover:bg-primary-hover text-white font-bold py-4 px-12 rounded-full shadow-lg hover:shadow-primary/50 transition-all duration-300 hover:-translate-y-1 active:scale-95 text-lg">
+        class="mt-8 group relative overflow-hidden bg-primary hover:bg-primary-hover text-white font-bold py-3 sm:py-4 px-8 sm:px-12 rounded-full shadow-lg hover:shadow-primary/50 transition-all duration-300 hover:-translate-y-1 active:scale-95 text-base sm:text-lg">
         <span class="relative z-10 flex items-center gap-2">
           <Icon icon="mdi:play-circle" class="w-6 h-6" />
           {{ t('home.startTraining') }}

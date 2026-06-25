@@ -261,11 +261,9 @@ const render = () => {
   let maxSeparation = 250;
 
   if (props.usePhysicalCalibration) {
-    const cssWidth = window.screen.width;
-    const cssHeight = window.screen.height;
-    const cssDiagonal = Math.sqrt(cssWidth * cssWidth + cssHeight * cssHeight);
-    const physicalDiagonalMm = props.screenDiagonal * 25.4;
-    const pixelsPerMm = cssDiagonal / physicalDiagonalMm;
+    // Use standard CSS pixel ratio (1 inch = 96 pixels) to ensure consistency 
+    // across devices and prevent the distance from changing when the canvas/window resizes.
+    const pixelsPerMm = 96 / 25.4;
     const ipdPixels = props.userIPD * pixelsPerMm;
 
     if (props.mode === 'parallel') {
@@ -273,15 +271,16 @@ const render = () => {
       minSeparation = ipdPixels * 0.4;
     } else {
       minSeparation = ipdPixels;
-      maxSeparation = ipdPixels + (width * 0.3);
+      maxSeparation = ipdPixels + 250;
     }
   } else {
+    // Legacy mapping
     if (props.mode === 'parallel') {
       minSeparation = 80;
       maxSeparation = 80 + 220 * props.intensity;
     } else {
       minSeparation = 100;
-      maxSeparation = 100 + Math.min(width * 0.5, 600) * props.intensity;
+      maxSeparation = 100 + 400 * props.intensity;
     }
   }
 
@@ -356,7 +355,6 @@ const render = () => {
         let by = base.getY(i);
         let bz = base.getZ(i);
         let rx = rnds.getX(i);
-        let ry = rnds.getY(i);
         let rz = rnds.getZ(i);
         
         // Particles flow from deep space towards the camera
@@ -382,7 +380,6 @@ const render = () => {
   const focalLength = height / (2 * Math.tan(fovRad / 2));
 
   const sep_inf = props.mode === 'parallel' ? maxSep : minSep;
-  const sep_near = props.mode === 'parallel' ? minSep : maxSep;
 
   // Calculate physically correct IPD based on desired disparity range
   // Using 0.3m as the physical calibration distance (human reading distance) to perfectly match 2D mode's kinematic ratio!
@@ -439,6 +436,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="w-full flex-1 min-h-[400px] relative overflow-hidden bg-[#0f172a] rounded-2xl shadow-inner">
     <canvas ref="canvasRef" class="w-full h-full block"></canvas>
+    
 
     <!-- Stats -->
     <div v-if="isDynamic" ref="statsRef" class="absolute bottom-4 right-4 text-slate-400 font-mono text-sm pointer-events-none">

@@ -55,6 +55,10 @@ export default {
     }
   },
   training: {
+    rotate: {
+      title: 'Please rotate your device',
+      desc: 'Please rotate your device to landscape mode to get enough inter-pupillary distance for training. Disable orientation lock if needed.'
+    },
     confirmExit: '훈련이 진행 중입니다. 정말 종료하시겠습니까?',
     round: '라운드',
     completed: '훈련 완료',

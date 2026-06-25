@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, watch } from 'vue';
+import { onBeforeUnmount, watch, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useTrainingSession } from '../features/training/composables/useTrainingSession';
@@ -14,6 +14,19 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const session = useTrainingSession();
 
+const isPortrait = ref(false);
+const checkOrientation = () => {
+  isPortrait.value = window.innerHeight > window.innerWidth;
+  if (isPortrait.value && session.status.value === 'running') {
+    session.pauseSession();
+  }
+};
+
+onMounted(() => {
+  checkOrientation();
+  window.addEventListener('resize', checkOrientation);
+});
+
 session.startSession(settingsStore.$state);
 
 watch(() => session.status.value, (newStatus) => {
@@ -24,6 +37,7 @@ watch(() => session.status.value, (newStatus) => {
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkOrientation);
   if (session.status.value === 'running' || session.status.value === 'paused') {
     session.stopSession();
     const record = session.getRecord();
@@ -60,13 +74,13 @@ const togglePause = () => {
         <Icon icon="mdi:arrow-left" class="w-6 h-6" />
       </button>
       
-      <div class="text-sm font-medium text-slate-500 flex items-center gap-4">
+      <div class="text-xs sm:text-sm font-medium text-slate-500 flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-center">
         <span v-if="session.status.value !== 'completed'">
           {{ t('training.round') }}: {{ session.currentRound.value }} / {{ session.totalRounds.value }}
         </span>
         <span v-else class="text-primary font-bold">{{ t('training.completed') }}</span>
         
-        <span v-if="session.currentPhase.value === 'dynamic'" class="text-primary font-bold font-mono text-lg bg-primary/10 px-3 py-1 rounded-md">
+        <span v-if="session.currentPhase.value === 'dynamic'" class="text-primary font-bold font-mono text-base sm:text-lg bg-primary/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md">
           {{ session.currentCycles.value }} / {{ settingsStore.cycles }} {{ t('training.times') }}
         </span>
       </div>
@@ -83,6 +97,13 @@ const togglePause = () => {
 
     <div class="flex-1 flex flex-col mb-2 relative min-h-0">
       
+      <!-- Orientation Warning Overlay -->
+      <div v-if="isPortrait" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-slate-900/95 backdrop-blur-md rounded-2xl text-white p-6 text-center border border-slate-700">
+        <Icon icon="mdi:phone-rotate-landscape" class="w-24 h-24 mb-6 text-primary animate-bounce" />
+        <h2 class="text-xl sm:text-2xl font-bold mb-4">{{ t('training.rotate.title') }}</h2>
+        <p class="text-sm sm:text-base text-slate-300 max-w-sm leading-relaxed">{{ t('training.rotate.desc') }}</p>
+      </div>
+
       <div v-if="session.currentPhase.value === 'rest'" class="flex-1 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
         <div class="text-7xl font-black text-slate-800 dark:text-slate-100 mb-6 font-mono tracking-tighter opacity-50">
           {{ formatTime(session.timeLeftSec.value) }}

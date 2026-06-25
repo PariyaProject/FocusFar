@@ -55,6 +55,10 @@ export default {
     }
   },
   training: {
+    rotate: {
+      title: '请将手机横屏握持',
+      desc: '为了获得足够的双眼间距，请旋转手机至横屏模式进行训练。如果开启了方向锁定，请暂时关闭。'
+    },
     confirmExit: '訓練正在進行中，確定要退出嗎？',
     round: '第',
     completed: '訓練完成',
