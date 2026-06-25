@@ -19,7 +19,7 @@ export default {
     todayCompleted: 'Completado Hoy',
     times: 'veces',
     startTraining: 'Iniciar Entrenamiento',
-    defaultFlow: 'Flujo por defecto: Prep 5s → (Cerca 5s → Lejos 20s → Descanso 10s) × 3'
+    currentFlow: 'Ajustes actuales: {cycles} estiramientos × {rounds} rondas (Descanso {rest}s)'
   },
   settings: {
     title: 'Ajustes de Entrenamiento',

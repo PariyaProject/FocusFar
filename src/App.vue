@@ -4,10 +4,15 @@ import { useI18n } from 'vue-i18n'
 import { setLanguage } from './i18n'
 import { useSettingsStore } from './features/settings/settingsStore'
 import { storeToRefs } from 'pinia'
+import { watchEffect } from 'vue'
 
 const { t, locale } = useI18n()
 const settingsStore = useSettingsStore()
 const { stereoMode, renderEngine } = storeToRefs(settingsStore)
+
+watchEffect(() => {
+  document.title = t('app.title')
+})
 
 const setViewMode = (mode: 'cross' | 'parallel') => {
   stereoMode.value = mode

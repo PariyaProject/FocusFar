@@ -1,6 +1,6 @@
 export default {
   app: {
-    title: 'FocusFar',
+    title: '遠眺計畫',
     description: '一個幫助您定期眺望遠處、放鬆雙眼並減少持續近距離工作的網頁工具。',
     nav: {
       history: '歷史記錄',
@@ -19,7 +19,7 @@ export default {
     todayCompleted: '今日已完成',
     times: '次',
     startTraining: '開始訓練',
-    defaultFlow: '預設流程: 準備 5s → (看近 5s → 看遠 20s → 閉眼 10s) × 3'
+    currentFlow: '目前設定: 單輪 {cycles} 次拉伸 × {rounds} 輪 (休息 {rest}s)'
   },
   settings: {
     title: '訓練設定',

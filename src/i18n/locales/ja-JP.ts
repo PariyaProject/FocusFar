@@ -19,7 +19,7 @@ export default {
     todayCompleted: '本日の完了回数',
     times: '回',
     startTraining: 'トレーニング開始',
-    defaultFlow: 'デフォルト: 準備 5秒 → (近 5秒 → 遠 20秒 → 休憩 10秒) × 3'
+    currentFlow: '現在の設定: 1ラウンド {cycles} 回ストレッチ × {rounds} ラウンド (休憩 {rest}秒)'
   },
   settings: {
     title: 'トレーニング設定',

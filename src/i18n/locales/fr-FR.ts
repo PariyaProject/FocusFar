@@ -7,8 +7,8 @@ export default {
     viewMode: { cross: 'Croisé', parallel: 'Parallèle' }
   },
   home: {
-    todayCompleted: 'Terminé Aujourd\'hui', times: 'fois', startTraining: 'Démarrer l\'entraînement',
-    defaultFlow: 'Flux par défaut: Prép 5s → (Près 5s → Loin 20s → Repos 10s) × 3'
+    todayCompleted: 'Terminé Aujourd\'hui', times: 'fois', startTraining: 'Commencer',
+    currentFlow: 'Paramètres actuels: {cycles} étirements × {rounds} tours (Repos {rest}s)'
   },
   settings: {
     title: 'Paramètres d\'entraînement', save: 'Enregistrer', saved: 'Paramètres enregistrés', reset: 'Réinitialiser', confirmReset: 'Voulez-vous vraiment réinitialiser les paramètres par défaut ?',

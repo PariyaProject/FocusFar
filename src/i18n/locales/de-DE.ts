@@ -19,7 +19,7 @@ export default {
     todayCompleted: 'Heute Abgeschlossen',
     times: 'mal',
     startTraining: 'Training Starten',
-    defaultFlow: 'Standard-Ablauf: Vorb. 5s → (Nah 5s → Fern 20s → Pause 10s) × 3'
+    currentFlow: 'Aktuelle Einstellungen: {cycles} Dehnungen × {rounds} Runden (Pause {rest}s)'
   },
   settings: {
     title: 'Trainings-Einstellungen',

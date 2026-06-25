@@ -19,7 +19,7 @@ export default {
     todayCompleted: '今日完成训练',
     times: '次',
     startTraining: '开始训练',
-    defaultFlow: '默认流程: 准备 5s → (看近 5s → 看远 20s → 闭眼 10s) × 3'
+    currentFlow: '当前设置: 单轮 {cycles} 次拉伸 × {rounds} 轮 (休息 {rest}s)'
   },
   settings: {
     title: '训练设置',

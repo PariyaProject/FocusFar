@@ -19,7 +19,7 @@ export default {
     todayCompleted: '오늘 완료',
     times: '회',
     startTraining: '훈련 시작',
-    defaultFlow: '기본 흐름: 준비 5초 → (가까이 5초 → 멀리 20초 → 휴식 10초) × 3'
+    currentFlow: '현재 설정: 라운드당 {cycles} 회 스트레칭 × {rounds} 라운드 (휴식 {rest}초)'
   },
   settings: {
     title: '훈련 설정',

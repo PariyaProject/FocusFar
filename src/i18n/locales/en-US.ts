@@ -19,7 +19,7 @@ export default {
     todayCompleted: 'Completed Today',
     times: 'times',
     startTraining: 'Start Training',
-    defaultFlow: 'Default flow: Prep 5s → (Near 5s → Far 20s → Rest 10s) × 3'
+    currentFlow: 'Current settings: {cycles} stretches × {rounds} rounds (Rest {rest}s)'
   },
   settings: {
     title: 'Training Settings',

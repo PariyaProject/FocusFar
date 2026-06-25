@@ -3,10 +3,12 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { statsService } from '../features/stats/statsService';
+import { useSettingsStore } from '../features/settings/settingsStore';
 import { Icon } from '@iconify/vue';
 
 const router = useRouter();
 const { t } = useI18n();
+const settings = useSettingsStore();
 const todayCompleted = ref(0);
 
 onMounted(() => {
@@ -45,7 +47,7 @@ const startTraining = () => {
       </button>
       
       <div class="mt-4 text-xs text-slate-400">
-        {{ t('home.defaultFlow') }}
+        {{ t('home.currentFlow', { cycles: settings.cycles, rounds: settings.rounds, rest: settings.restSec }) }}
       </div>
     </div>
   </div>
